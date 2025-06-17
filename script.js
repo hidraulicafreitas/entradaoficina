@@ -289,23 +289,31 @@ function closeModal(modalId) {
 }
 
 function setupEventListeners() {
-    serviceForm.addEventListener('submit', handleFormSubmit);
-    authorizeBtn.addEventListener('click', handleAuthorizeClick);
-    clearBtn.addEventListener('click', handleClearForm);
-    tryAgainBtn.addEventListener('click', () => closeModal('errorModal'));
+    if (serviceForm) serviceForm.addEventListener('submit', handleFormSubmit);
+    if (authorizeBtn) authorizeBtn.addEventListener('click', handleAuthorizeClick);
+    if (clearBtn) clearBtn.addEventListener('click', handleClearForm);
+    if (tryAgainBtn) tryAgainBtn.addEventListener('click', () => closeModal('errorModal'));
 
-    telefoneInput.addEventListener('input', (e) => {
-        e.target.value = formatPhoneNumber(e.target.value);
-    });
+    if (telefoneInput) {
+        telefoneInput.addEventListener('input', (e) => {
+            e.target.value = formatPhoneNumber(e.target.value);
+        });
+    }
 
-    placaInput.addEventListener('input', (e) => {
-        e.target.value = formatPlate(e.target.value);
-    });
+    if (placaInput) {
+        placaInput.addEventListener('input', (e) => {
+            e.target.value = formatPlate(e.target.value);
+        });
+    }
 }
 
 async function initializeApp() {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
+
+    // Por padrão, mostra o formulário e esconde o botão de autorização
+    if (serviceForm) serviceForm.style.display = 'block';
+    if (authorizeBtn) authorizeBtn.style.display = 'none';
 
     if (code) {
         showModal(loadingModal);
@@ -315,32 +323,33 @@ async function initializeApp() {
                 localStorage.setItem('blingAccessToken', accessToken);
                 hideModal(loadingModal);
                 window.history.replaceState({}, document.title, window.location.pathname); // Limpa o código da URL
-                authorizeBtn.style.display = 'none';
-                serviceForm.style.display = 'block'; // Garante que o formulário esteja visível após a autorização
+                // O formulário já está visível, o botão de autorização já está escondido
             })
             .catch(error => {
                 hideModal(loadingModal);
                 showModal(errorModal);
                 errorMessage.textContent = error.message;
-                authorizeBtn.style.display = 'block';
-                serviceForm.style.display = 'block'; // Garante que o formulário esteja visível mesmo com erro de autorização
+                // Em caso de erro na autorização, exibe o botão de autorização e esconde o formulário
+                if (authorizeBtn) authorizeBtn.style.display = 'block';
+                if (serviceForm) serviceForm.style.display = 'none';
             });
     } else if (localStorage.getItem('blingAccessToken')) {
         accessToken = localStorage.getItem('blingAccessToken');
         const isValid = await validateAccessToken(accessToken);
         if (isValid) {
-            authorizeBtn.style.display = 'none';
-            serviceForm.style.display = 'block'; // Garante que o formulário esteja visível se o token for válido
+            // Token válido, formulário já visível, botão de autorização já escondido
         } else {
             localStorage.removeItem('blingAccessToken');
             accessToken = null;
-            authorizeBtn.style.display = 'block';
-            serviceForm.style.display = 'block'; // Garante que o formulário esteja visível se o token for inválido/expirado
+            // Token inválido/expirado, exibe o botão de autorização e esconde o formulário
+            if (authorizeBtn) authorizeBtn.style.display = 'block';
+            if (serviceForm) serviceForm.style.display = 'none';
             console.warn('Token de acesso inválido ou expirado. Por favor, autorize novamente.');
         }
     } else {
-        authorizeBtn.style.display = 'block';
-        serviceForm.style.display = 'block'; // Garante que o formulário esteja visível por padrão
+        // Não há código na URL nem token no localStorage, exibe o botão de autorização e esconde o formulário
+        if (authorizeBtn) authorizeBtn.style.display = 'block';
+        if (serviceForm) serviceForm.style.display = 'none';
     }
     setupEventListeners();
 }

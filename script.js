@@ -3,7 +3,7 @@ const BLING_CONFIG = {
     clientId: '6b6ba3a8083c01e5680db675ab9b5b2717d2b775',
     clientSecret: 'dd7759bf9486cf0d8bc357f838f09e01601c722d23f86d3335e76de24228',
     redirectUri: 'https://hidraulicafreitas.github.io/entradaoficina/',
-    baseUrl: 'https://api.bling.com.br/Api/v3'
+    baseUrl: 'https://5000-izv86tl7ud6aqdki674b9-17906309.manusvm.computer'
 };
 
 // Estado da aplicação

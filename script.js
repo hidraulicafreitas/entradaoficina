@@ -304,7 +304,6 @@ function setupEventListeners() {
 }
 
 async function initializeApp() {
-    localStorage.removeItem('blingAccessToken'); // Força nova autorização
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
 
@@ -317,31 +316,31 @@ async function initializeApp() {
                 hideModal(loadingModal);
                 window.history.replaceState({}, document.title, window.location.pathname); // Limpa o código da URL
                 authorizeBtn.style.display = 'none';
-                serviceForm.style.display = 'block';
+                serviceForm.style.display = 'block'; // Garante que o formulário esteja visível após a autorização
             })
             .catch(error => {
                 hideModal(loadingModal);
                 showModal(errorModal);
                 errorMessage.textContent = error.message;
                 authorizeBtn.style.display = 'block';
-                serviceForm.style.display = 'none';
+                serviceForm.style.display = 'block'; // Garante que o formulário esteja visível mesmo com erro de autorização
             });
     } else if (localStorage.getItem('blingAccessToken')) {
         accessToken = localStorage.getItem('blingAccessToken');
         const isValid = await validateAccessToken(accessToken);
         if (isValid) {
             authorizeBtn.style.display = 'none';
-            serviceForm.style.display = 'block';
+            serviceForm.style.display = 'block'; // Garante que o formulário esteja visível se o token for válido
         } else {
             localStorage.removeItem('blingAccessToken');
             accessToken = null;
             authorizeBtn.style.display = 'block';
-            serviceForm.style.display = 'none';
+            serviceForm.style.display = 'block'; // Garante que o formulário esteja visível se o token for inválido/expirado
             console.warn('Token de acesso inválido ou expirado. Por favor, autorize novamente.');
         }
     } else {
         authorizeBtn.style.display = 'block';
-        serviceForm.style.display = 'none';
+        serviceForm.style.display = 'block'; // Garante que o formulário esteja visível por padrão
     }
     setupEventListeners();
 }

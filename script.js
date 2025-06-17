@@ -16,7 +16,7 @@ const clearBtn = document.getElementById('clearBtn');
 const authorizeBtn = document.getElementById('authorizeBtn');
 
 const clienteInput = document.getElementById('cliente');
-const nomePessoaInput = document.getElementById('nomePessoa');
+const nomePessoaInput = document.getElementById('responsavel');
 const telefoneInput = document.getElementById('telefone');
 const placaInput = document.getElementById('placa');
 const reclamacaoInput = document.getElementById('reclamacao');
@@ -107,6 +107,23 @@ async function getAccessToken(code) {
     } catch (error) {
         console.error('Erro na troca do código por token:', error);
         throw new Error('Erro na autorização. Tente novamente.');
+    }
+}
+
+async function validateAccessToken(token) {
+    try {
+        // Tenta fazer uma requisição simples, como listar contatos, para validar o token
+        const response = await fetch(`${BLING_CONFIG.baseUrl}/contatos?filters=nome[]`, { // Filtro vazio para pegar qualquer contato ou nenhum
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.ok; // Retorna true se a requisição for bem-sucedida (token válido)
+    } catch (error) {
+        console.error('Erro ao validar token:', error);
+        return false; // Retorna false se houver erro (token inválido)
     }
 }
 
@@ -228,5 +245,108 @@ async function handleFormSubmit(event) {
 
     if (!accessToken) {
         showModal(errorModal);
-        errorMessage.textContent = 'Aplicativo não autorizado. Por favor, clique em 
+        errorMessage.textContent = 'Aplicativo não autorizado. Por favor, clique em "Autorizar Bling" para conectar.';
+        return;
+    }
+
+    showModal(loadingModal);
+
+    const formData = {
+        cliente: clienteInput.value.trim(),
+        nomePessoa: nomePessoaInput.value.trim(),
+        telefone: telefoneInput.value.trim(),
+        placa: placaInput.value.trim(),
+        reclamacao: reclamacaoInput.value.trim()
+    };
+
+    try {
+        await createSalesOrder(formData, accessToken);
+        hideModal(loadingModal);
+        showModal(successModal);
+        document.getElementById('successMessage').textContent = 'Pedido de venda criado com sucesso no Bling!';
+        serviceForm.reset(); // Limpa o formulário após o sucesso
+        localStorage.removeItem('blingAccessToken'); // Força nova autorização para evitar tokens expirados
+        initializeApp(); // Re-inicializa para mostrar o botão de autorização
+    } catch (error) {
+        hideModal(loadingModal);
+        showModal(errorModal);
+        errorMessage.textContent = error.message;
+    }
+}
+
+function handleAuthorizeClick() {
+    const authUrl = `https://www.bling.com.br/b/Api/v3/oauth/authorize?response_type=code&client_id=${BLING_CONFIG.clientId}&state=random_state&redirect_uri=${BLING_CONFIG.redirectUri}`;
+    window.location.href = authUrl;
+}
+
+function handleClearForm() {
+    serviceForm.reset();
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    hideModal(modal);
+}
+
+function setupEventListeners() {
+    serviceForm.addEventListener('submit', handleFormSubmit);
+    authorizeBtn.addEventListener('click', handleAuthorizeClick);
+    clearBtn.addEventListener('click', handleClearForm);
+    tryAgainBtn.addEventListener('click', () => closeModal('errorModal'));
+
+    telefoneInput.addEventListener('input', (e) => {
+        e.target.value = formatPhoneNumber(e.target.value);
+    });
+
+    placaInput.addEventListener('input', (e) => {
+        e.target.value = formatPlate(e.target.value);
+    });
+}
+
+async function initializeApp() {
+    localStorage.removeItem('blingAccessToken'); // Força nova autorização
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+
+    if (code) {
+        showModal(loadingModal);
+        getAccessToken(code)
+            .then(token => {
+                accessToken = token;
+                localStorage.setItem('blingAccessToken', accessToken);
+                hideModal(loadingModal);
+                window.history.replaceState({}, document.title, window.location.pathname); // Limpa o código da URL
+                authorizeBtn.style.display = 'none';
+                serviceForm.style.display = 'block';
+            })
+            .catch(error => {
+                hideModal(loadingModal);
+                showModal(errorModal);
+                errorMessage.textContent = error.message;
+                authorizeBtn.style.display = 'block';
+                serviceForm.style.display = 'none';
+            });
+    } else if (localStorage.getItem('blingAccessToken')) {
+        accessToken = localStorage.getItem('blingAccessToken');
+        const isValid = await validateAccessToken(accessToken);
+        if (isValid) {
+            authorizeBtn.style.display = 'none';
+            serviceForm.style.display = 'block';
+        } else {
+            localStorage.removeItem('blingAccessToken');
+            accessToken = null;
+            authorizeBtn.style.display = 'block';
+            serviceForm.style.display = 'none';
+            console.warn('Token de acesso inválido ou expirado. Por favor, autorize novamente.');
+        }
+    } else {
+        authorizeBtn.style.display = 'block';
+        serviceForm.style.display = 'none';
+    }
+    setupEventListeners();
+}
+
+// Inicializa o aplicativo quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', initializeApp);
+
 

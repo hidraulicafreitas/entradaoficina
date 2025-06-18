@@ -4,102 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HIDRAULICA FREITAS - REGISTRO DE ENTRADA EM OFICINA</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <div class="logo">
-                <i class="fas fa-tools"></i>
-                <h1>HIDRAULICA FREITAS</h1>
-            </div>
-            <p class="subtitle">REGISTRO DE ENTRADA EM OFICINA</p>
-        </header>
-
-        <main class="main-content">
-            <form id="serviceForm" class="service-form">
-                <div class="form-section">
-                    <h2><i class="fas fa-user"></i> Dados do Cliente</h2>
-                    
-                    <div class="form-group">
-                        <label for="cliente">Cliente *</label>
-                        <input type="text" id="cliente" name="cliente" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="responsavel">Nome da Pessoa que Deixou o Serviço *</label>
-                        <input type="text" id="responsavel" name="responsavel" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="telefone">Número de Telefone</label>
-                        <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000">
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h2><i class="fas fa-cog"></i> Dados do Equipamento</h2>
-                    
-                    <div class="form-group">
-                        <label for="placa">Placa do Equipamento *</label>
-                        <input type="text" id="placa" name="placa" required placeholder="ABC-1234">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="reclamacao">Reclamação do Cliente *</label>
-                        <textarea id="reclamacao" name="reclamacao" required rows="4" placeholder="Descreva o problema relatado pelo cliente..."></textarea>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" id="authorizeBtn" class="btn btn-secondary" style="display: none;">
-                        <i class="fas fa-key"></i>
-                        Autorizar Bling
-                    </button>
-                    <button type="button" id="clearBtn" class="btn btn-secondary">
-                        <i class="fas fa-eraser"></i>
-                        Limpar Formulário
-                    </button>
-                    <button type="submit" id="submitBtn" class="btn btn-primary">
-                        <i class="fas fa-paper-plane"></i>
-                        Registrar Entrada
-                    </button>
-                </div>
-            </form>
-
-            <div id="loadingModal" class="modal">
-                <div class="modal-content">
-                    <div class="loading-spinner"></div>
-                    <p>Registrando entrada no sistema...</p>
-                </div>
+        <h1>HIDRAULICA FREITAS<br>Registro de Entrada em Oficina</h1>
+        <form id="serviceForm">
+            <div class="form-group">
+                <label for="cliente">Cliente <span class="required">*</span></label>
+                <input type="text" id="cliente" required placeholder="Nome do cliente">
             </div>
 
-            <div id="successModal" class="modal">
-                <div class="modal-content success">
-                    <i class="fas fa-check-circle"></i>
-                    <h3>Entrada Registrada com Sucesso!</h3>
-                    <p id="successMessage"></p>
-                    <button class="btn btn-primary" onclick="closeModal('successModal')">OK</button>
-                </div>
+            <div class="form-group">
+                <label for="placa">Placa do Equipamento <span class="required">*</span></label>
+                <input type="text" id="placa" required placeholder="Ex: ABC-1234">
             </div>
 
-            <div id="errorModal" class="modal">
-                <div class="modal-content error">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Erro ao Registrar Entrada</h3>
-                    <p id="errorMessage"></p>
-                    <button class="btn btn-secondary" onclick="closeModal('errorModal')">Tentar Novamente</button>
-                </div>
+            <div class="form-group">
+                <label for="reclamacao">Reclamação do Cliente <span class="required">*</span></label>
+                <textarea id="reclamacao" required placeholder="Descreva o problema relatado pelo cliente"></textarea>
             </div>
-        </main>
 
-        <footer class="footer">
-            <p>&copy; 2025 Hidraulica Freitas. Todos os direitos reservados.</p>
-        </footer>
+            <div class="form-group">
+                <label for="nome_responsavel">Nome da Pessoa que Deixou o Serviço <span class="required">*</span></label>
+                <input type="text" id="nome_responsavel" required placeholder="Nome completo">
+            </div>
+
+            <div class="form-group">
+                <label for="telefone_responsavel">Telefone de Contato (Opcional)</label>
+                <input type="tel" id="telefone_responsavel" placeholder="(11) 99999-9999">
+            </div>
+
+            <button type="submit" id="submitBtn">Registrar Serviço</button>
+        </form>
+        
+        <div id="successMessage" class="success-message">
+            Serviço registrado com sucesso! Os dados foram coletados e estão prontos para integração com o Bling.
+        </div>
+        
+        <div id="errorMessage" class="error-message">
+            Erro ao registrar o serviço. Verifique os dados e tente novamente.
+        </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>

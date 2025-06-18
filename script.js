@@ -289,6 +289,7 @@ function closeModal(modalId) {
 }
 
 function setupEventListeners() {
+    // Adiciona event listeners apenas se os elementos existirem
     if (serviceForm) serviceForm.addEventListener('submit', handleFormSubmit);
     if (authorizeBtn) authorizeBtn.addEventListener('click', handleAuthorizeClick);
     if (clearBtn) clearBtn.addEventListener('click', handleClearForm);
@@ -311,9 +312,9 @@ async function initializeApp() {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
 
-    // Por padrão, mostra o formulário e esconde o botão de autorização
+    // Garante que o formulário e o botão de autorização estejam visíveis por padrão
     if (serviceForm) serviceForm.style.display = 'block';
-    if (authorizeBtn) authorizeBtn.style.display = 'none';
+    if (authorizeBtn) authorizeBtn.style.display = 'block';
 
     if (code) {
         showModal(loadingModal);
@@ -323,13 +324,15 @@ async function initializeApp() {
                 localStorage.setItem('blingAccessToken', accessToken);
                 hideModal(loadingModal);
                 window.history.replaceState({}, document.title, window.location.pathname); // Limpa o código da URL
-                // O formulário já está visível, o botão de autorização já está escondido
+                // Após autorização, esconde o botão de autorização e mostra o formulário
+                if (authorizeBtn) authorizeBtn.style.display = 'none';
+                if (serviceForm) serviceForm.style.display = 'block';
             })
             .catch(error => {
                 hideModal(loadingModal);
                 showModal(errorModal);
                 errorMessage.textContent = error.message;
-                // Em caso de erro na autorização, exibe o botão de autorização e esconde o formulário
+                // Em caso de erro na autorização, mantém o botão de autorização visível e o formulário escondido
                 if (authorizeBtn) authorizeBtn.style.display = 'block';
                 if (serviceForm) serviceForm.style.display = 'none';
             });
@@ -337,17 +340,19 @@ async function initializeApp() {
         accessToken = localStorage.getItem('blingAccessToken');
         const isValid = await validateAccessToken(accessToken);
         if (isValid) {
-            // Token válido, formulário já visível, botão de autorização já escondido
+            // Token válido, esconde o botão de autorização e mostra o formulário
+            if (authorizeBtn) authorizeBtn.style.display = 'none';
+            if (serviceForm) serviceForm.style.display = 'block';
         } else {
             localStorage.removeItem('blingAccessToken');
             accessToken = null;
-            // Token inválido/expirado, exibe o botão de autorização e esconde o formulário
+            // Token inválido/expirado, mantém o botão de autorização visível e o formulário escondido
             if (authorizeBtn) authorizeBtn.style.display = 'block';
             if (serviceForm) serviceForm.style.display = 'none';
             console.warn('Token de acesso inválido ou expirado. Por favor, autorize novamente.');
         }
     } else {
-        // Não há código na URL nem token no localStorage, exibe o botão de autorização e esconde o formulário
+        // Não há código na URL nem token no localStorage, mantém o botão de autorização visível e o formulário escondido
         if (authorizeBtn) authorizeBtn.style.display = 'block';
         if (serviceForm) serviceForm.style.display = 'none';
     }
